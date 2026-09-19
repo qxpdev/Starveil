@@ -1,0 +1,82 @@
+name: Draft Windows release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '已推送的版本标签 / Existing version tag (e.g. v1.10.4)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: draft-release-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  draft:
+    runs-on: windows-2022
+    timeout-minutes: 25
+    env:
+      RELEASE_TAG: ${{ inputs.tag }}
+      ELECTRON_MIRROR: https://github.com/electron/electron/releases/download/
+    steps:
+      - name: Validate tag format
+        shell: pwsh
+        run: |
+          if ($env:RELEASE_TAG -notmatch '^v\d+\.\d+\.\d+$') {
+            throw 'Use an existing tag such as v1.10.4.'
+          }
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify tagged version
+        shell: pwsh
+        run: |
+          $manifest = Get-Content -LiteralPath package.json -Raw | ConvertFrom-Json
+          if ($env:RELEASE_TAG -ne "v$($manifest.version)") {
+            throw 'The tag must match package.json version.'
+          }
+          $tagCommit = git rev-parse --verify "refs/tags/$($env:RELEASE_TAG)^{commit}"
+          if ($LASTEXITCODE -ne 0) { throw 'The version tag does not exist.' }
+          $checkoutCommit = git rev-parse HEAD
+          if ($tagCommit -ne $checkoutCommit) { throw 'The checkout does not match the tag.' }
+      - uses: pnpm/action-setup@v6.1.0
+        with:
+          cache: false
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: '22'
+          cache: pnpm
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Type check
+        run: pnpm typecheck
+      - name: Test behavior and data protection
+        run: pnpm test
+      - name: Build Windows portable app and verify packaged files
+        run: pnpm dist
+      - name: Prepare release notes
+        run: pnpm release:notes
+      - name: Create a release draft for review
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: pwsh
+        run: |
+          $manifest = Get-Content -LiteralPath package.json -Raw | ConvertFrom-Json
+          $prefix = "$($manifest.build.productName)-$($manifest.version)"
+          $assets = @(
+            "release/$prefix-win-x64.exe",
+            "release/$prefix-win-x64.exe.sha256",
+            "release/$prefix-NOTICES.txt"
+          )
+          foreach ($asset in $assets) {
+            if (-not (Test-Path -LiteralPath $asset -PathType Leaf)) { throw "Missing artifact: $asset" }
+          }
+          gh release create $env:RELEASE_TAG @assets --verify-tag --draft --title "Starveil $env:RELEASE_TAG" --notes-file "release/$prefix-release-notes.md"
+          if ($LASTEXITCODE -ne 0) { throw 'The draft was not created. Existing releases are never overwritten.' }

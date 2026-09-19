@@ -1,0 +1,41 @@
+name: 问题反馈 / Bug report
+description: 报告显示、礼物、统计、缓存或启动问题。
+title: '[Bug] '
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Starveil 版本 / Version
+      placeholder: 例如 1.10.4，可在“测试与关于”查看
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Windows 与显示设置 / Environment
+      placeholder: Windows 11、1920×1080、125% 缩放、双屏
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 复现步骤与实际表现 / Steps and actual result
+      description: 写明显示方式、操作步骤和发生频率；截图请遮挡不想公开的信息。
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望表现 / Expected result
+    validations:
+      required: true
+  - type: input
+    id: room-gift
+    attributes:
+      label: 房间与礼物信息 / Room and gift details
+      description: 涉及礼物、抽奖、表情或高能弹幕时，可补充公开房间号、名称和发生时间。
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: 补充信息 / Additional context
+      description: 可贴相关错误文本。无需上传完整配置、缓存、统计或弹幕历史目录。

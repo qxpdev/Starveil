@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'" />
+    <title>Starveil · 星幕 · 斗鱼弹幕助手</title>
+    <link rel="stylesheet" href="./shell.css" />
+    <link rel="stylesheet" href="./home.css" />
+  </head>
+  <body>
+    <header id="titlebar" class="titlebar">
+      <div class="titlebar-brand"><img data-brand-icon alt="" /><span>Starveil</span><small>星幕 · 斗鱼弹幕助手</small></div>
+      <div class="titlebar-controls">
+        <button id="winMin" class="win-btn" type="button" title="最小化" aria-label="最小化窗口"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10" /></svg></button>
+        <button id="winMax" class="win-btn" type="button" title="最大化" aria-label="最大化窗口"><svg class="maximize-glyph" viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="3.5" width="9" height="9" /></svg><svg class="restore-glyph" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3h7v7M3.5 6.5h6v6h-6z" /></svg></button>
+        <button id="winClose" class="win-btn btn-close" type="button" title="关闭" aria-label="关闭窗口"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 3.5 9 9m0-9-9 9" /></svg></button>
+      </div>
+    </header>
+    <main class="home-main">
+      <div class="home-heading"><div><h1>连接你的直播间</h1><p>弹幕、礼物与互动，随时看得见。</p></div><div id="connStatus" class="status-pill" role="status">未连接</div></div>
+      <div class="workspace">
+        <section class="connection-form" aria-label="直播间连接">
+          <label class="room-label" for="roomId">斗鱼房间</label>
+          <div class="room-input-wrap"><img id="homeLogo" data-brand-icon alt="房间头像" /><input id="roomId" type="text" placeholder="输入房间号或粘贴直播间链接" autocomplete="off" spellcheck="false" /></div>
+          <div class="connect-actions"><button id="toggle" type="button" class="button primary off"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 4 14 8-14 8Z" /></svg><span>启动飘屏</span></button><button id="reconnect" type="button" class="button">重新连接</button></div>
+          <p id="connectionDetail" aria-live="polite">填入房间后，即可开始接收实时弹幕。</p>
+          <div class="quick-setting"><label for="quickClickThrough">鼠标穿透</label><label class="toggle-switch"><input type="checkbox" id="quickClickThrough" data-config="clickThrough" aria-label="鼠标穿透" /><span class="slider"></span></label></div>
+          <div class="quick-setting"><label for="quickTopmost">窗口置顶</label><label class="toggle-switch"><input type="checkbox" id="quickTopmost" data-config="overlayAlwaysOnTop" aria-label="窗口置顶" /><span class="slider"></span></label></div>
+        </section>
+        <section class="preview-panel" aria-label="弹幕样式示例">
+          <div class="preview-heading">弹幕预览</div>
+          <div id="stylePreview" class="preview-messages"><div class="preview-user"><span class="preview-avatar">星</span><strong>星幕用户</strong></div><p class="preview-copy">大家晚上好，今天也要开心直播。</p><div class="preview-gift">✦ 星河观众 送出 火箭 ×2</div></div>
+          <span class="preview-caption">示例内容 · 按当前外观缩小展示</span>
+        </section>
+      </div>
+      <footer class="home-footer"><div class="meta"><div class="meta-line"><span id="appVersion"></span><span>设置自动保存</span><button id="updateHint" class="button quiet" type="button" hidden></button></div><span id="giftPriceHint">连接后自动获取斗鱼礼物价格</span></div><div class="home-footer-actions"><button id="openHistory" class="button quiet" type="button">统计历史</button><button id="openSettings" class="button" type="button">调整外观与规则<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10" /></svg></button></div></footer>
+    </main>
+    <script type="module" src="./home.ts"></script>
+  </body>
+</html>

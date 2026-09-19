@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.douyucdn.cn; connect-src 'self'" />
+    <title>Starveil · 星幕 · 设置</title>
+    <link rel="stylesheet" href="./shell.css" />
+    <link rel="stylesheet" href="./settings.css" />
+  </head>
+  <body>
+    <header id="titlebar" class="titlebar">
+      <div class="titlebar-brand"><button id="backHome" class="back-home" type="button" aria-label="返回主面板" title="返回主面板"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12 5-5 5 5 5" /></svg></button><img data-brand-icon alt="" /><span>Starveil</span><small>星幕 · 设置</small></div>
+      <div class="titlebar-controls">
+        <button id="winMin" class="win-btn" type="button" title="最小化" aria-label="最小化窗口"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10" /></svg></button>
+        <button id="winMax" class="win-btn" type="button" title="最大化" aria-label="最大化窗口"><svg class="maximize-glyph" viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="3.5" width="9" height="9" /></svg><svg class="restore-glyph" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3h7v7M3.5 6.5h6v6h-6z" /></svg></button>
+        <button id="winClose" class="win-btn btn-close" type="button" title="关闭" aria-label="关闭窗口"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 3.5 9 9m0-9-9 9" /></svg></button>
+      </div>
+    </header>
+    <div class="settings-layout">
+      <aside class="settings-sidebar"><div class="search-box"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" /><path d="m13 13 4 4" /></svg><input id="settingsSearch" type="search" placeholder="搜索设置" aria-label="搜索设置" autocomplete="off" /></div><nav class="settings-nav" aria-label="设置分类"><span class="nav-caption">显示与样式</span><button type="button" data-section="window">显示与窗口</button><button type="button" data-section="appearance">外观与排版</button><button type="button" data-section="edge">边缘沉浸</button><button type="button" data-section="messages">消息组成</button><button type="button" data-section="gifts">礼物与抽奖</button><button type="button" data-section="status">统计栏</button><button type="button" data-section="filters">内容过滤</button><span class="nav-caption">记录与维护</span><button type="button" data-section="history">每日统计</button><button type="button" data-section="storage">存储与缓存</button><button type="button" data-section="advanced">测试与关于</button></nav><div class="sidebar-bottom"><button id="openConfigDirectory" class="button quiet" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h6l2 2h10v11H3Z" /></svg>打开配置目录</button><span style="padding-left:12px">Starveil <span data-app-version></span></span></div></aside>
+      <main class="settings-scroll content"><header class="settings-heading"><div><h1 id="settingsTitle">显示与窗口</h1><p id="settingsDescription">决定弹幕显示在哪里，以及它与桌面的交互方式。</p></div><div id="saveStatus" class="save-status" role="status" aria-live="polite"><span id="saveStatusText">自动保存</span></div></header><p id="saveError" class="app-error" role="alert" hidden></p><section class="settings-page" data-page="window" data-title="显示与窗口" data-description="先选择显示方式，再设置显示器和窗口操作。" hidden>
+<section class="settings-group" data-settings-group><h2 class="group-heading">显示方式与动效</h2>
+<div class="setting-item" >
+              <div class="setting-info"><label id="label-scrollDir" for="scrollDir">显示方式</label><div class="setting-desc">边缘沉浸：消息从底部侧边滑入，按顺序上移，最旧消息沿侧边退出；空闲时消息消失，统计栏可独立常驻。</div></div>
+              <div class="setting-control"><select id="scrollDir" data-config="danmakuScrollDirection" aria-labelledby="label-scrollDir"><option value="verticalUp">消息流 · 由下向上</option><option value="edge">边缘沉浸 · 逐条滑入滑出</option><option value="horizontal">横向飘 · 从右向左</option><option value="vertical">竖向飘 · 从上到下</option></select></div>
+            </div>
+<div class="setting-item" >
+              <div class="setting-info"><label id="label-speed" for="speed">滚动速度</label><div class="setting-desc">100% 为标准速度。控制飘屏、消息流移动及边缘进退场的快慢，不改变停留时间。关闭动效时，消息流与边缘模式直接切换位置。</div></div>
+              <div class="setting-control"><div class="range-control"><input id="speed" type="range" min="40" max="320" step="5" data-config="speedPxPerSec" aria-labelledby="label-speed" /><span class="range-val"><span id="speedVal"></span>%</span></div></div>
+            </div>
+<div class="setting-item"><div class="setting-info"><label for="motionEnabled">柔和动效</label><div class="setting-desc">消息进退场、列表移动与设置操作使用柔和缓动，跟随系统减少动态效果设置。</div></div><div class="setting-control"><label class="toggle-switch"><input type="checkbox" id="motionEnabled" data-config="motionEnabled" aria-label="柔和动效" /><span class="slider"></span></label></div></div>
+</section>
+<section class="settings-group" data-settings-group><h2 class="group-heading">显示器与窗口</h2>
+<div class="setting-item" >
+              <div class="setting-info"><label id="label-overlayOn" for="overlayOn">启用飘屏</label><div class="setting-desc">开启后显示悬浮弹幕并连接当前房间。</div></div>
+              <div class="setting-control"><label class="toggle-switch"><input type="checkbox" id="overlayOn" data-config="overlayEnabled" aria-label="启用飘屏" /><span class="slider"></span></label></div>
+            </div>
+<div class="setting-item full-width" >
+              <div class="setting-info"><label id="label-overlayDisplay" for="overlayDisplay">飘屏显示器</label><div class="setting-desc">跟随 1080p、2K、4K 与 Windows 缩放自动适配。</div></div>
+              <div class="setting-control"><select id="overlayDisplay" aria-label="飘屏显示器"></select></div>
+            </div>
+<div class="setting-item" >
+              <div class="setting-info"><label id="label-clickThrough" for="clickThrough">鼠标穿透</label><div class="setting-desc">关闭后可拖动、缩放弹幕窗口。边缘沉浸模式始终穿透鼠标。</div></div>
+              <div class="setting-control"><label class="toggle-switch"><input type="checkbox" id="clickThrough" data-config="clickThrough" aria-label="鼠标穿透" /><span class="slider"></span></label></div>
+            </div>
+<div class="setting-item" >
+              <div class="setting-info"><label id="label-overlayAlwaysOnTop" for="overlayAlwaysOnTop">窗口置顶</label><div class="setting-desc">使弹幕显示在普通窗口上方。</div></div>
+              <div class="setting-control"><label class="toggle-switch"><input type="checkbox" id="overlayAlwaysOnTop" data-config="overlayAlwaysOnTop" aria-label="窗口置顶" /><span class="slider"></span></label></div>
+            </div>
+<div class="setting-item" data-requires-topmost>
+              <div class="setting-info"><label id="label-overlayAutoRefreshTopmost" for="overlayAutoRefreshTopmost">自动刷新置顶</label><div class="setting-desc">其他窗口遮挡后恢复到前方，不抢走当前输入焦点。</div></div>
+              <div class="setting-control"><label class="toggle-switch"><input type="checkbox" id="overlayAutoRefreshTopmost" data-config="overlayAutoRefreshTopmost" aria-label="自动刷新置顶" /><span class="slider"></span></label></div>
+            </div>
+<div class="setting-item" >
+              <div class="setting-info"><label id="label-overlayEdgeSnap" for="overlayEdgeSnap">松手贴边</label><div class="setting-desc">普通窗口松手后在边缘 6px 内轻柔吸附。边缘沉浸模式自动贴住所选屏幕。</div></div>
+              <div class="setting-control"><label class="toggle-switch"><input type="checkbox" id="overlayEdgeSnap" data-config="overlayEdgeSnap" aria-label="松手贴边" /><span class="slider"></span></label></div>
+            </div>
+</section>
+</section>
+<section class="settings-page" data-page="appearance" data-title="外观与排版" data-description="调整文字、身份标识和普通弹幕的底色，拖动即可实时看到变化。" hidden>
+<section class="settings-group" data-settings-group><h2 class="group-heading">文字与身份</h2>
+<div class="setting-item" >
+              <div class="setting-info"><label id="label-fontSize" for="fontSize">字体大小</label><div class="setting-desc">长消息根据可用空间自适应，放大窗口后恢复。</div></div>
+              <div class="setting-control"><div class="range-control"><input id="fontSize" type="range" min="12" max="96" step="1" data-config="fontSize" data-format="" aria-labelledby="label-fontSize" /><span class="range-val"><span id="fontSizeVal"></span> px</span></div></div>
+            </div>
+<div class="setting-item" >
+              <div class="setting-info"><label id="label-avatarSize" for="avatarSize">头像大小</label><div class="setting-desc">独立调整，不改变正文大小。</div></div>
+              <div class="setting-control"><div class="range-control"><input id="avatarSize" type="range" min="16" max="128" step="1" data-config="avatarSize" data-format="" aria-labelledby="label-avatarSize" /><span class="range-val"><span id="avatarSizeVal"></span> px</span></div></div>
+            </div>
+<div class="setting-item" >
+              <div class="setting-info"><label id="label-letterSpacing" for="letterSpacing">文字字距</label><div class="setting-desc">控制字符之间的距离。</div></div>
+              <div class="setting-control"><div class="range-control"><input id="letterSpacing" type="range" min="0" max="12" step="0.5" data-config="letterSpacing" data-format="" aria-labelledby="label-letterSpacing" /><span class="range-val"><span id="letterSpacingVal"></span> px</span></div></div>
+            </div>
+<div class="setting-item" >
+              <div class="setting-info"><label id="label-lineHeight" for="lineHeight">文字行高</label><div class="setting-desc">1.0 倍更紧凑，1.5 倍更舒展。徽章与大昵称按实际高度占位。</div></div>
+              <div class="setting-control"><div class="range-control"><input id="lineHeight" type="range" min="1" max="2.5" step="0.1" data-config="lineHeight" data-format="" aria-labelledby="label-lineHeight" /><span class="range-val"><span id="lineHeightVal"></span> 倍</span></div></div>
+            </div>
+<div class="setting-item"><div class="setting-info"><label id="label-fansMedalScale" for="fansMedalScale">粉丝牌大小</label><div class="setting-desc">牌名、等级与钻粉标一起缩放，保持完整比例。</div></div><div class="setting-control"><div class="range-control"><input id="fansMedalScale" type="range" min="0.6" max="1.8" step="0.05" data-config="fansMedalScale" data-format="percent" aria-labelledby="label-fansMedalScale" /><span class="range-val"><span id="fansMedalScaleVal"></span>%</span></div></div></div>
+<div class="setting-item"><div class="setting-info"><label id="label-userLevelScale" for="userLevelScale">等级图标大小</label><div class="setting-desc">独立调整斗鱼用户等级图标。</div></div><div class="setting-control"><div class="range-control"><input id="userLevelScale" type="range" min="0.6" max="1.8" step="0.05" data-config="userLevelScale" data-format="percent" aria-labelledby="label-userLevelScale" /><span class="range-val"><span id="userLevelScaleVal"></span>%</span></div></div></div>
+<div class="setting-item"><div class="setting-info"><label id="label-nicknameScale" for="nicknameScale">昵称大小</label><div class="setting-desc">独立调整聊天和礼物中的用户名称。</div></div><div class="setting-control"><div class="range-control"><input id="nicknameScale" type="range" min="0.6" max="1.8" step="0.05" data-config="nicknameScale" data-format="percent" aria-labelledby="label-nicknameScale" /><span class="range-val"><span id="nicknameScaleVal"></span>%</span></div></div></div>
+<div class="setting-item"><div class="setting-info"><span class="setting-name">恢复默认排版</span><div class="setting-desc">重置字号、头像、身份标识、字距、行高与消息间距。</div></div><div class="setting-control"><button id="resetTypography" class="button quiet" type="button">恢复默认</button></div></div>
+</section>
+<section class="settings-group" data-settings-group><h2 class="group-heading">文字颜色</h2>
+<div class="setting-item" >
+              <div class="setting-info"><label id="label-commonTextColor" for="commonTextColor">正文颜色</label></div>
+              <div class="setting-control"><input type="hidden" id="commonTextColor" data-config="commonTextColor" data-color-input /><button type="button" class="color-trigger" data-color-for="commonTextColor" aria-expanded="false" aria-label="选择正文颜色"><span class="swatch"></span><span class="hex-value"></span><svg class="chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg></button></div>
+            </div>
+<div class="setting-item" >
+              <div class="setting-info"><label id="label-usernameTextColor" for="usernameTextColor">昵称颜色</label></div>
+              <div class="setting-control"><input type="hidden" id="usernameTextColor" data-config="usernameTextColor" data-color-input /><button type="button" class="color-trigger" data-color-for="usernameTextColor" aria-expanded="false" aria-label="选择昵称颜色"><span class="swatch"></span><span class="hex-value"></span><svg class="chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg></button></div>
+            </div>
+<div class="setting-item" >
+              <div class="setting-info"><label id="label-giftTextColor" for="giftTextColor">礼物颜色</label></div>
+              <div class="setting-control"><input type="hidden" id="giftTextColor" data-config="giftTextColor" data-color-input /><button type="button" class="color-trigger" data-color-for="giftTextColor" aria-expanded="false" aria-label="选择礼物颜色"><span class="swatch"></span><span class="hex-value"></span><svg class="chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg></button></div>
+            </div>
+<div class="setting-item" >
+              <div class="setting-info"><label id="label-minorTextColor" for="minorTextColor">辅助文字颜色</label></div>
+              <div class="setting-control"><input type="hidden" id="minorTextColor" data-config="minorTextColor" data-color-input /><button type="button" class="color-trigger" data-color-for="minorTextColor" aria-expanded="false" aria-label="选择辅助文字颜色"><span class="swatch"></span><span class="hex-value"></span><svg class="chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg></button></div>
+            </div>
+<div class="setting-item" >
+              <div class="setting-info"><label id="label-textShadowColor" for="textShadowColor">文字阴影</label><div class="setting-desc">仅为文字增加柔和阴影，粉丝牌保持干净边缘。</div></div>
+              <div class="setting-control"><input type="hidden" id="textShadowColor" data-config="textShadowColor" data-color-input /><button type="button" class="color-trigger" data-color-for="textShadowColor" aria-expanded="false" aria-label="选择文字阴影"><span class="swatch"></span><span class="hex-value"></span><svg class="chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg></button><label class="toggle-switch"><input type="checkbox" id="textShadowOn" aria-label="启用文字阴影" /><span class="slider"></span></label></div>
+            </div>
+<div class="setting-item" >
+              <div class="setting-info"><label id="label-showDanmakuColor" for="showDanmakuColor">使用斗鱼弹幕颜色</label><div class="setting-desc">有原始颜色的弹幕优先使用平台颜色。</div></div>
+              <div class="setting-control"><label class="toggle-switch"><input type="checkbox" id="showDanmakuColor" data-config="showDanmakuColor" aria-label="使用斗鱼弹幕颜色" /><span class="slider"></span></label></div>
+            </div>
+</section>
+<section class="settings-group" data-settings-group><h2 class="group-heading">普通弹幕与窗口底色</h2>
+<div class="setting-item" >
+              <div class="setting-info"><label id="label-opacity" for="opacity">窗口整体不透明度</label><div class="setting-desc">同时调整文字、头像与背景，不重建弹幕窗口。</div></div>
+              <div class="setting-control"><div class="range-control"><input id="opacity" type="range" min="0.05" max="1" step="0.01" data-config="opacity" data-format="percent" aria-labelledby="label-opacity" /><span class="range-val"><span id="opacityVal"></span>%</span></div></div>
+            </div>
+<div class="setting-item" >
+              <div class="setting-info"><label id="label-danmakuBgColor" for="danmakuBgColor">背景颜色</label><div class="setting-desc">普通弹幕、礼物和统计栏共用此底色，各自的不透明度独立调整。</div></div>
+              <div class="setting-control"><input type="hidden" id="danmakuBgColor" data-config="danmakuBgColor" data-color-input /><button type="button" class="color-trigger" data-color-for="danmakuBgColor" aria-expanded="false" aria-label="选择背景颜色"><span class="swatch"></span><span class="hex-value"></span><svg class="chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg></button></div>
+            </div>
+<div class="setting-item" >
+              <div class="setting-info"><label id="label-overlayBackgroundOpacity" for="overlayBackgroundOpacity">窗口背景不透明度</label><div class="setting-desc">普通窗口有内容时才显示底色；边缘沉浸模式始终保持窗口全透明。</div></div>
+              <div class="setting-control"><div class="range-control"><input id="overlayBackgroundOpacity" type="range" min="0" max="1" step="0.01" data-config="overlayBackgroundOpacity" data-format="percent" aria-labelledby="label-overlayBackgroundOpacity" /><span class="range-val"><span id="overlayBackgroundOpacityVal"></span>%</span></div></div>
+            </div>
+<div class="setting-item" >
+              <div class="setting-info"><label id="label-danmakuBgOpacity" for="danmakuBgOpacity">消息背景不透明度</label><div class="setting-desc">只调整普通弹幕的衬底。礼物和统计栏在各自分类中设置不透明度。</div></div>
+              <div class="setting-control"><div class="range-control"><input id="danmakuBgOpacity" type="range" min="0" max="1" step="0.01" data-config="danmakuBgOpacity" data-format="percent" aria-labelledby="label-danmakuBgOpacity" /><span class="range-val"><span id="danmakuBgOpacityVal"></span>%</span></div></div>
+            </div>
+<div class="setting-item" >
+              <div class="setting-info"><label id="label-lanePad" for="lanePad">消息间距</label><div class="setting-desc">普通消息流的行间距离；边缘沉浸在“边缘沉浸”分类中单独设置。</div></div>
+              <div class="setting-control"><div class="range-control"><input id="lanePad" type="range" min="0" max="40" step="1" data-config="lanePadding" data-format="" aria-labelledby="label-lanePad" /><span class="range-val"><span id="lanePadVal"></span> px</span></div></div>
+            </div>
+</section>
+</section>
+<section class="settings-page" data-page="edge" data-title="边缘沉浸" data-description="弹幕与礼物共用一列，从底部进入，按顺序上移，最旧消息从顶部侧边退出。" hidden>
+<section class="settings-group" data-settings-group><h2 class="group-heading">位置与宽度</h2>
+<div class="setting-item full-width mode-note"><p id="edgeModeNote">边缘沉浸按接收顺序显示弹幕与礼物。</p><button id="activateEdgeMode" type="button" class="button quiet">切换为边缘沉浸</button></div>
+<div class="setting-item" data-requires-edge>
+              <div class="setting-info"><label for="edgeSide">进入边缘</label><div class="setting-desc">使用“显示与窗口”中选择的显示器，避开可见任务栏。</div></div>
+              <div class="setting-control"><select id="edgeSide" data-config="edgeSide"><option value="right">屏幕右侧</option><option value="left">屏幕左侧</option></select></div>
+            </div>
+<div class="setting-item" data-requires-edge>
+              <div class="setting-info"><label id="label-edgeWidth" for="edgeWidth">边缘显示宽度</label><div class="setting-desc">拖动时实时预览，按 Windows 缩放自动适配；宽度与普通窗口独立。</div></div>
+              <div class="setting-control"><div class="range-control"><input id="edgeWidth" type="range" min="280" max="640" step="10" data-config="edgeWidth" aria-labelledby="label-edgeWidth" /><span class="range-val"><span id="edgeWidthVal"></span> px</span></div></div>
+            </div>
+<div class="setting-item" data-requires-edge>
+              <div class="setting-info"><label id="label-edgeBottomPercent" for="edgeBottomPercent">边缘上下位置</label><div class="setting-desc">调整距屏幕底部的留白，数值越大位置越高。拖动实时移动，松开保存。</div></div>
+              <div class="setting-control"><div class="range-control"><input id="edgeBottomPercent" type="range" min="0" max="80" step="1" data-config="edgeBottomPercent" aria-labelledby="label-edgeBottomPercent" /><span class="range-val"><span id="edgeBottomPercentVal"></span>%</span></div></div>
+            </div>
+</section>
+<section class="settings-group" data-settings-group><h2 class="group-heading">排列与停留</h2>
+<div class="setting-item" data-requires-edge>
+              <div class="setting-info"><label for="edgeMaxVisible">同屏消息上限</label><div class="setting-desc">新消息立即从底部进入，已有消息一起上移。满屏时顶部旧消息退出，不排队等待；统计和正文保存照常采集。</div></div>
+              <div class="setting-control"><input id="edgeMaxVisible" type="number" min="1" max="8" step="1" data-config="edgeMaxVisible" /></div>
+            </div>
+<div class="setting-item" data-requires-edge><div class="setting-info"><label id="label-edgeMessageGap" for="edgeMessageGap">消息间距</label><div class="setting-desc">弹幕与礼物使用相同间距，不预留固定空白。</div></div><div class="setting-control"><div class="range-control"><input id="edgeMessageGap" type="range" min="0" max="32" step="1" data-config="edgeMessageGap" aria-labelledby="label-edgeMessageGap" /><span class="range-val">px</span></div></div></div>
+<div class="setting-item" data-requires-edge>
+              <div class="setting-info"><label for="edgeHoldSec">消息保留时间（秒）</label><div class="setting-desc">所有消息使用同一时长，从完整进场后计时。新消息到来时照常上移，满屏时优先显示最新消息。</div></div>
+              <div class="setting-control"><input id="edgeHoldSec" type="number" min="2" max="20" step="0.5" data-config="edgeHoldSec" /></div>
+            </div>
+<div class="setting-item" data-requires-edge><div class="setting-info"><label for="edgeGiftTopHoldSec">礼物顶部额外停留（秒）</label><div class="setting-desc">礼物移至消息列顶部后额外保留，下方弹幕照常上移。最多保留一条，新礼物到顶时接替；设为 0 关闭。仅显示一条或空间不足时，优先显示最新消息。</div></div><div class="setting-control"><input id="edgeGiftTopHoldSec" type="number" min="0" max="60" step="0.5" data-config="edgeGiftTopHoldSec" /></div></div>
+</section>
+<section class="settings-group" data-settings-group><h2 class="group-heading">常驻信息</h2>
+<div class="setting-item"><div class="setting-info"><strong>边缘统计栏</strong><div class="setting-desc">可固定在阅读区域顶部或底部，选择常驻、随消息显示或隐藏。</div></div><button type="button" class="button quiet" data-settings-link="status">设置统计栏</button></div>
+</section>
+</section>
+<section class="settings-page" data-page="messages" data-title="消息组成" data-description="选择弹幕中需要显示的身份信息、表情和普通窗口保留规则。" hidden>
+<section class="settings-group" data-settings-group><h2 class="group-heading">身份与表情</h2>
+<div class="setting-item full-width" >
+              <div class="setting-info"><label id="label-chatModules" for="chatModules">消息组成</label><div class="setting-desc">按头像、身份标识、粉丝牌、等级、昵称与正文排列。</div></div>
+              <div class="setting-control"><div id="chatModules" class="choice-group" data-config-group="chatModules"><label class="option-check"><input type="checkbox" value="moderator" />房管标识</label><label class="option-check"><input type="checkbox" value="avatar" />用户头像</label><label class="option-check"><input type="checkbox" value="noble" />贵族标识</label><label class="option-check"><input type="checkbox" value="medal" />粉丝牌</label><label class="option-check"><input type="checkbox" value="level" />用户等级</label><label class="option-check"><input type="checkbox" value="gifticon" />礼物图片</label></div></div>
+            </div>
+<div class="setting-item">
+              <div class="setting-info"><label for="showDouyuEmoticons">显示斗鱼表情</label><div class="setting-desc">显示普通表情、钻粉梗及房间表情。图片按需缓存；未知表情或加载失败保留原文。</div></div>
+              <div class="setting-control"><label class="toggle-switch"><input type="checkbox" id="showDouyuEmoticons" data-config="showDouyuEmoticons" aria-label="显示斗鱼表情" /><span class="slider"></span></label></div>
+            </div>
+</section>
+<section class="settings-group" data-settings-group><h2 class="group-heading">普通窗口保留规则</h2>
+<div class="setting-item" >
+              <div class="setting-info"><label id="label-commonTimeSec" for="commonTimeSec">保留时间（秒）</label><div class="setting-desc">设为 0 时不按时间移除。边缘沉浸使用“边缘沉浸”中的独立阅读时间。</div></div>
+              <div class="setting-control"><input id="commonTimeSec" type="number" min="0" max="600" step="1" data-config="commonTimeSec" aria-labelledby="label-commonTimeSec" /></div>
+            </div>
+<div class="setting-item" >
+              <div class="setting-info"><label id="label-commonTotal" for="commonTotal">最多显示条数</label><div class="setting-desc">超出可用空间时优先移除完整的旧消息。</div></div>
+              <div class="setting-control"><input id="commonTotal" type="number" min="10" max="60" step="1" data-config="commonTotal" aria-labelledby="label-commonTotal" /></div>
+            </div>
+</section>
+</section>
+<section class="settings-page" data-page="gifts" data-title="礼物与抽奖" data-description="礼物独立调透明度；边缘沉浸中与弹幕紧密排列。" hidden>
+<section class="settings-group" data-settings-group><h2 class="group-heading">礼物样式</h2>
+<div class="setting-item" ><div class="setting-info"><label id="label-giftModule" for="giftModule">显示礼物</label><div class="setting-desc">关闭只停止展示，已开启的统计和记录仍照常采集。</div></div><div class="setting-control"><label class="toggle-switch"><input id="giftModule" type="checkbox" data-widget-module="highlight" aria-label="显示礼物" /><span class="slider"></span></label></div></div>
+<div class="setting-item" data-requires-highlight><div class="setting-info"><label id="label-giftLayout" for="giftLayout">礼物排版</label><div class="setting-desc">紧凑单行与普通弹幕同高；双行卡片保留更多横向空间。抽奖礼包始终保留投入和奖励明细。</div></div><div class="setting-control"><select id="giftLayout" data-config="giftLayout" aria-labelledby="label-giftLayout"><option value="inline">紧凑单行</option><option value="card">双行卡片</option></select></div></div>
+<div class="setting-item" data-requires-highlight><div class="setting-info"><label id="label-giftAmountScale" for="giftAmountScale">礼物金额大小</label><div class="setting-desc">突出本次送礼的总金额，透明底也保留清晰描边。抽奖显示已收到的奖励总额，投入另列。</div></div><div class="setting-control"><div class="range-control"><input id="giftAmountScale" type="range" min="1" max="1.8" step="0.05" data-config="giftAmountScale" data-format="percent" aria-labelledby="label-giftAmountScale" /><span class="range-val"><span id="giftAmountScaleVal"></span>%</span></div></div></div>
+<div class="setting-item" data-requires-highlight><div class="setting-info"><label id="label-giftOpacity" for="giftOpacity">礼物整体不透明度</label><div class="setting-desc">独立调整礼物文字、图片与背景的可见度，不影响普通弹幕。</div></div><div class="setting-control"><div class="range-control"><input id="giftOpacity" type="range" min="0.05" max="1" step="0.01" data-config="giftOpacity" data-format="percent" aria-labelledby="label-giftOpacity" /><span class="range-val">%</span></div></div></div>
+<div class="setting-item" data-requires-highlight><div class="setting-info"><label id="label-giftBackgroundOpacity" for="giftBackgroundOpacity">礼物底色不透明度</label><div class="setting-desc">0% 完全透明；只改变衬底，不影响礼物文字。</div></div><div class="setting-control"><div class="range-control"><input id="giftBackgroundOpacity" type="range" min="0" max="1" step="0.01" data-config="giftBackgroundOpacity" data-format="percent" aria-labelledby="label-giftBackgroundOpacity" /><span class="range-val">%</span></div></div></div>
+<div class="setting-item" data-requires-highlight>
+              <div class="setting-info"><label for="giftValueColors">按礼物价值显示强调色</label><div class="setting-desc">用金额和细色线区分价值；抽奖按实际奖励金额变色。免费为灰色，待补价为灰蓝色。</div><div class="gift-value-legend"><span data-tier="small">¥0.01–9.99</span><span data-tier="medium">¥10–99.99</span><span data-tier="large">¥100–999.99</span><span data-tier="premium">¥1000+</span></div></div>
+              <div class="setting-control"><label class="toggle-switch"><input type="checkbox" id="giftValueColors" data-config="giftValueColors" aria-label="按礼物价值显示强调色" /><span class="slider"></span></label></div>
+            </div>
+</section>
+<section class="settings-group" data-settings-group><h2 class="group-heading">斗鱼官方素材</h2>
+<div class="setting-item" data-requires-highlight>
+              <div class="setting-info"><label for="giftOfficialBanner">斗鱼官方礼物条</label><div class="setting-desc">按本次送礼广播使用官方皮肤，窗口底色仍透明。关闭时显示简洁的透明礼物栏；没有对应素材时自动使用简洁样式。</div></div>
+              <div class="setting-control"><label class="toggle-switch"><input type="checkbox" id="giftOfficialBanner" data-config="giftOfficialBanner" aria-label="斗鱼官方礼物条" /><span class="slider"></span></label></div>
+            </div>
+<div class="setting-item" data-requires-banner><div class="setting-info"><label id="label-giftBannerOpacity" for="giftBannerOpacity">官方礼物条不透明度</label><div class="setting-desc">单独控制官方皮肤，文字和礼物图片保持各自可见度。</div></div><div class="setting-control"><div class="range-control"><input id="giftBannerOpacity" type="range" min="0" max="1" step="0.01" data-config="giftBannerOpacity" data-format="percent" aria-labelledby="label-giftBannerOpacity" /><span class="range-val">%</span></div></div></div>
+<div class="setting-item" data-requires-highlight>
+              <div class="setting-info"><label for="giftOfficialAnimation">斗鱼官方礼物动画</label><div class="setting-desc">在礼物图位置播放本次送礼实际触发的透明特效，静音且同时只播一个。关闭柔和动效或系统要求减少动态效果时停播；不支持的格式显示礼物图片。</div></div>
+              <div class="setting-control"><label class="toggle-switch"><input type="checkbox" id="giftOfficialAnimation" data-config="giftOfficialAnimation" aria-label="斗鱼官方礼物动画" /><span class="slider"></span></label></div>
+            </div>
+</section>
+<section class="settings-group" data-settings-group><h2 class="group-heading">展示与合并</h2>
+<div class="setting-item" data-requires-highlight>
+              <div class="setting-info"><label id="label-markedFilterYuan" for="markedFilterYuan">礼物展示门槛（元）</label><div class="setting-desc">只展示总价达到此值的礼物，不影响统计记录。</div></div>
+              <div class="setting-control"><input id="markedFilterYuan" type="number" min="0" max="1000000" step="0.01" data-config="markedFilterYuan" aria-labelledby="label-markedFilterYuan" /></div>
+            </div>
+<div class="setting-item" data-requires-highlight>
+              <div class="setting-info"><label id="label-giftFold" for="giftFold">合并连续礼物</label><div class="setting-desc">同一用户连续赠送相同礼物时合并数量。抽奖礼物会汇总为「投入金额＝已开出金额」，多种奖品共用一张卡片。</div></div>
+              <div class="setting-control"><label class="toggle-switch"><input type="checkbox" id="giftFold" data-config="giftFold" aria-label="合并连续礼物" /><span class="slider"></span></label></div>
+            </div>
+<div class="setting-item" data-requires-highlight>
+              <div class="setting-info"><label id="label-showFreeGifts" for="showFreeGifts">显示免费礼物</label><div class="setting-desc">控制显示；免费礼物仍计入数量，价值为 0。</div></div>
+              <div class="setting-control"><label class="toggle-switch"><input type="checkbox" id="showFreeGifts" data-config="showFreeGifts" aria-label="显示免费礼物" /><span class="slider"></span></label></div>
+            </div>
+<div class="setting-item" data-requires-highlight>
+              <div class="setting-info"><label id="label-markedTimeSec" for="markedTimeSec">普通窗口礼物保留（秒）</label><div class="setting-desc">仅用于普通窗口，0 表示不按时间移除。边缘沉浸按每条消息的长度独立计算阅读时间。</div></div>
+              <div class="setting-control"><input id="markedTimeSec" type="number" min="0" max="1800" step="1" data-config="markedTimeSec" aria-labelledby="label-markedTimeSec" /></div>
+            </div>
+<div class="setting-item" data-requires-highlight>
+              <div class="setting-info"><label id="label-markedTotal" for="markedTotal">普通窗口礼物上限</label><div class="setting-desc">仅用于普通窗口。边缘沉浸中礼物与弹幕共用同屏消息上限。</div></div>
+              <div class="setting-control"><input id="markedTotal" type="number" min="1" max="8" step="1" data-config="markedTotal" aria-labelledby="label-markedTotal" /></div>
+            </div>
+</section>
+<section class="settings-group" data-settings-group><h2 class="group-heading">价格与抽奖目录</h2>
+<div class="setting-item full-width" >
+              <div class="setting-info"><label id="label-catalogSummary" for="catalogSummary">自动获取礼物价格</label><div class="setting-desc">普通礼物和奖励道具分别查价，活动更换后按新 ID 自动补查。抽奖按实际开出的奖励及数量统计，不重复计入抽奖道具价格。</div></div>
+              <div class="setting-control"><div><div id="catalogSummary" class="catalog-summary" role="status">连接后自动获取</div><div id="catalogDetail" class="catalog-detail"></div><button type="button" id="refreshGiftCatalog" class="button quiet">刷新礼物价格</button></div></div>
+            </div>
+<div id="giftPricingPanel" class="setting-item full-width">
+  <div class="setting-info"><span class="setting-name">手动补充礼物价格</span><div class="setting-desc">平台暂未提供价格时，可按礼物 ID 补充单价。普通礼物与奖励道具分开对应；平台确认价格后优先使用正式价格。</div></div>
+  <div id="giftPricingEmpty" class="gift-pricing-empty">当前没有待补价的礼物，已保存的手动价格也会显示在这里。</div>
+  <div id="giftPricingList" class="gift-pricing-list"></div>
+  <details class="gift-price-add"><summary>按礼物 ID 添加价格</summary>
+    <form id="manualGiftForm" class="gift-price-add-form">
+      <label for="manualGiftType">礼物类型<select id="manualGiftType"><option value="gift">普通礼物</option><option value="prop">奖励道具</option></select></label>
+      <label for="manualGiftId">礼物 ID<input id="manualGiftId" type="text" inputmode="numeric" maxlength="18" autocomplete="off" placeholder="例如 20005" required /></label>
+      <label for="manualGiftName">礼物名称<input id="manualGiftName" type="text" maxlength="60" autocomplete="off" placeholder="可选，用于识别礼物" /></label>
+      <label for="manualGiftAmount">单价（元）<input id="manualGiftAmount" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00" required /></label>
+      <button type="submit" class="button">保存手动价格</button>
+    </form>
+  </details>
+  <div id="giftPricingStatus" class="gift-pricing-status" role="status" aria-live="polite"></div>
+</div>
+</section>
+</section>
+<section class="settings-page" data-page="status" data-title="统计栏" data-description="把本次直播间统计固定成一条小信息栏，位置和透明度独立设置。" hidden>
+<section class="settings-group" data-settings-group><h2 class="group-heading">显示方式</h2>
+<div class="setting-item" ><div class="setting-info"><label id="label-statusModule" for="statusModule">启用统计栏</label><div class="setting-desc">只影响悬浮统计栏的显示，历史记录在“每日统计”中管理。</div></div><div class="setting-control"><label class="toggle-switch"><input id="statusModule" type="checkbox" data-widget-module="status" aria-label="启用统计栏" /><span class="slider"></span></label></div></div>
+<div class="setting-item" data-requires-edge-status><div class="setting-info"><label id="label-edgeStatusMode" for="edgeStatusMode">边缘沉浸中的统计栏</label><div class="setting-desc">常驻时即使没有弹幕也显示，只有统计条自身的底色。</div></div><div class="setting-control"><select id="edgeStatusMode" data-config="edgeStatusMode" aria-labelledby="label-edgeStatusMode"><option value="hidden">隐藏</option><option value="active">有消息时显示</option><option value="always">始终显示</option></select></div></div>
+<div class="setting-item" data-requires-edge-status><div class="setting-info"><label id="label-edgeStatusPosition" for="edgeStatusPosition">边缘统计栏位置</label><div class="setting-desc">固定在阅读区域顶部或底部，不跟随消息滚动，也不覆盖弹幕。</div></div><div class="setting-control"><select id="edgeStatusPosition" data-config="edgeStatusPosition" aria-labelledby="label-edgeStatusPosition"><option value="top">顶部</option><option value="bottom">底部</option></select></div></div>
+<div class="setting-item" data-requires-status>
+              <div class="setting-info"><label id="label-statusAlwaysVisible" for="statusAlwaysVisible">普通窗口统计栏常驻</label><div class="setting-desc">用于消息流、横向飘和竖向飘。边缘沉浸使用上方的独立显示方式。</div></div>
+              <div class="setting-control"><label class="toggle-switch"><input type="checkbox" id="statusAlwaysVisible" data-config="statusAlwaysVisible" aria-label="统计栏常驻显示" /><span class="slider"></span></label></div>
+            </div>
+</section>
+<section class="settings-group" data-settings-group><h2 class="group-heading">内容与外观</h2>
+<div class="setting-item full-width" data-requires-status>
+              <div class="setting-info"><label id="label-statusMetrics" for="statusMetrics">显示项目</label><div class="setting-desc">统计本次运行在当前房间收到的数据；显示过滤不影响计数。重连保留，换房间或切换测试模式重新开始。</div></div>
+              <div class="setting-control"><div id="statusMetrics" class="choice-group" data-config-group="statusMetrics"><label class="option-check"><input type="checkbox" value="noble" />贵宾数</label><label class="option-check"><input type="checkbox" value="danmakuUsers" />发言人数</label><label class="option-check"><input type="checkbox" value="danmakuCount" />弹幕条数</label><label class="option-check"><input type="checkbox" value="giftCount" />礼物数量</label><label class="option-check"><input type="checkbox" value="giftValue" />礼物价值</label></div></div>
+            </div>
+<div class="setting-item" data-requires-status><div class="setting-info"><label id="label-statusFontSize" for="statusFontSize">统计栏字号</label><div class="setting-desc">调整信息栏的文字大小，内容空间不足时轮换显示选定指标。</div></div><div class="setting-control"><div class="range-control"><input id="statusFontSize" type="range" min="12" max="24" step="1" data-config="statusFontSize" aria-labelledby="label-statusFontSize" /><span class="range-val">px</span></div></div></div>
+<div class="setting-item" data-requires-status><div class="setting-info"><label id="label-statusOpacity" for="statusOpacity">统计栏整体不透明度</label><div class="setting-desc">独立调整统计栏文字与底色的可见度。</div></div><div class="setting-control"><div class="range-control"><input id="statusOpacity" type="range" min="0.05" max="1" step="0.01" data-config="statusOpacity" data-format="percent" aria-labelledby="label-statusOpacity" /><span class="range-val">%</span></div></div></div>
+<div class="setting-item" data-requires-status><div class="setting-info"><label id="label-statusBackgroundOpacity" for="statusBackgroundOpacity">统计栏底色不透明度</label><div class="setting-desc">0% 完全透明，文字仍正常显示。</div></div><div class="setting-control"><div class="range-control"><input id="statusBackgroundOpacity" type="range" min="0" max="1" step="0.01" data-config="statusBackgroundOpacity" data-format="percent" aria-labelledby="label-statusBackgroundOpacity" /><span class="range-val">%</span></div></div></div>
+</section>
+<section class="settings-group" data-settings-group><h2 class="group-heading">统计范围</h2>
+<div class="setting-item full-width" >
+              <div class="setting-info"><label id="label-statsScope" for="statsScope">统计范围</label><div class="setting-desc">不包含启动前或断线期间未收到的数据。礼物价值以目录价格计算，不等于主播提现收入。</div></div>
+              <div class="setting-control"><span class="muted">未知价格会自动补齐</span></div>
+            </div>
+</section>
+</section>
+<section class="settings-page" data-page="filters" data-title="内容过滤" data-description="留下想看的消息，减少重复与打扰。" hidden><section class="settings-group" data-settings-group><h2 class="group-heading">聊天规则</h2><div class="setting-item full-width" >
+              <div class="setting-info"><label id="label-block" for="block">屏蔽词</label><div class="setting-desc">消息或礼物名称包含任一词时不显示，中文、英文逗号均可分隔。</div></div>
+              <div class="setting-control"><input id="block" type="text" placeholder="例如：广告, 刷屏" data-config="blockWords" data-csv="true" aria-labelledby="label-block" /></div>
+            </div><div class="setting-item full-width" >
+              <div class="setting-info"><label id="label-blockNicks" for="blockNicks">昵称黑名单</label><div class="setting-desc">支持完整昵称或其中一部分，多个词用逗号分隔。</div></div>
+              <div class="setting-control"><input id="blockNicks" type="text" placeholder="例如：广告账号, 机器人" data-config="blockNicks" data-csv="true" aria-labelledby="label-blockNicks" /></div>
+            </div><div class="setting-item" >
+              <div class="setting-info"><label id="label-chatMinLength" for="chatMinLength">最少文字数</label><div class="setting-desc">设为 0 时不限长度。</div></div>
+              <div class="setting-control"><input id="chatMinLength" type="number" min="0" max="10000" step="1" data-config="chatMinLength" aria-labelledby="label-chatMinLength" /></div>
+            </div><div class="setting-item full-width" >
+              <div class="setting-info"><label id="label-chatPrefix" for="chatPrefix">指定消息开头</label><div class="setting-desc">仅显示以此文字开头的弹幕，留空显示全部。</div></div>
+              <div class="setting-control"><input id="chatPrefix" type="text" placeholder="例如：主播" data-config="chatPrefix" aria-labelledby="label-chatPrefix" /></div>
+            </div><div class="setting-item" >
+              <div class="setting-info"><label id="label-dupMode" for="dupMode">重复弹幕</label><div class="setting-desc">只改变展示方式，弹幕统计仍按实际消息计算。</div></div>
+              <div class="setting-control"><select id="dupMode" data-config="duplicateDanmakuMode" aria-labelledby="label-dupMode"><option value="each">每条都显示</option><option value="once">同屏只显示一条</option><option value="merge">合并显示 · ×N</option></select></div>
+            </div><div class="setting-item" data-requires-merge>
+              <div class="setting-info"><label id="label-dupWindowSec" for="dupWindowSec">合并时间（秒）</label><div class="setting-desc">同文案在此时间内合并为连击。</div></div>
+              <div class="setting-control"><input id="dupWindowSec" type="number" min="1" max="300" step="1" data-config="duplicateMergeWindowSec" aria-labelledby="label-dupWindowSec" /></div>
+            </div><div class="setting-item" >
+              <div class="setting-info"><label id="label-filterRobotDanmaku" for="filterRobotDanmaku">过滤疑似机器人</label><div class="setting-desc">按斗鱼智能弹幕字段筛选，过滤的消息不计条数和人数；不能保证识别所有真人或机器人。切换只影响后续消息。</div></div>
+              <div class="setting-control"><label class="toggle-switch"><input type="checkbox" id="filterRobotDanmaku" data-config="filterRobotDanmaku" aria-label="过滤疑似机器人" /><span class="slider"></span></label></div>
+            </div></section><section class="settings-group" data-settings-group><h2 class="group-heading">进场欢迎</h2><div class="setting-item" >
+              <div class="setting-info"><label id="label-showWelcome" for="showWelcome">显示进场消息</label><div class="setting-desc">使用斗鱼广播的进场信息。</div></div>
+              <div class="setting-control"><label class="toggle-switch"><input type="checkbox" id="showWelcome" data-config="showWelcome" aria-label="显示进场消息" /><span class="slider"></span></label></div>
+            </div><div class="setting-item" data-requires-welcome>
+              <div class="setting-info"><label id="label-welcomeNobleLevel" for="welcomeNobleLevel">最低贵族等级</label><div class="setting-desc">设为 0 时不限制贵族等级。</div></div>
+              <div class="setting-control"><input id="welcomeNobleLevel" type="number" min="0" max="9" step="1" data-config="welcomeNobleLevel" aria-labelledby="label-welcomeNobleLevel" /></div>
+            </div></section></section>
+<section class="settings-page" data-page="history" data-title="每日统计" data-description="按日期与直播间归档，随时查看并导出 Excel。" hidden>
+<section class="settings-group" data-settings-group><h2 class="group-heading">记录设置</h2>
+<div class="setting-item"><div class="setting-info"><label for="dailyStatisticsEnabled">开启每日统计</label><div class="setting-desc">记录每天的弹幕、用户与礼物。关闭后停止新增，已保存历史保留；弹幕窗口的本次统计照常显示。</div></div><div class="setting-control"><label class="toggle-switch"><input type="checkbox" id="dailyStatisticsEnabled" data-config="dailyStatisticsEnabled" aria-label="开启每日统计" /><span class="slider"></span></label></div></div>
+<div class="setting-item" data-requires-history><div class="setting-info"><label for="saveDanmakuHistory">保存弹幕正文</label><div class="setting-desc">开启后在本机保存时间、UID、昵称和完整正文，方便按用户查证。默认关闭，不会补回此前未保存的弹幕。</div></div><div class="setting-control"><label class="toggle-switch"><input type="checkbox" id="saveDanmakuHistory" data-config="saveDanmakuHistory" aria-label="保存弹幕正文" /><span class="slider"></span></label></div></div>
+</section><section class="settings-group history-group" data-settings-group><h2 class="group-heading">统计历史</h2><div class="setting-item full-width history-panel">
+<div class="history-toolbar"><div class="history-presets" role="group" aria-label="日期快捷筛选"><button type="button" data-history-days="1">今天</button><button type="button" data-history-days="7" aria-pressed="true">近 7 天</button><button type="button" data-history-days="30">近 30 天</button><button type="button" data-history-days="0">全部</button></div><button type="button" id="exportHistory" class="button primary" disabled>导出 Excel</button></div>
+<div class="history-filters"><label>开始日期<input id="historyStart" type="date" /></label><label>结束日期<input id="historyEnd" type="date" /></label><label>直播间<select id="historyRoom"><option value="">全部直播间</option></select></label><button id="refreshHistory" class="button quiet" type="button" aria-label="刷新统计历史">刷新</button></div>
+<div class="history-user-filter"><label for="historyUser">查找用户</label><input id="historyUser" type="search" placeholder="输入昵称或完整 UID" autocomplete="off" /><button id="clearHistoryUser" class="button quiet" type="button">清除筛选</button></div>
+<div class="history-summary"><div><span>弹幕条数</span><strong id="historyChatTotal">0</strong><small>当前筛选范围</small></div><div><span>收到礼物</span><strong id="historyGiftTotal">0</strong><small>不含抽奖投入</small></div><div><span>礼物价值</span><strong id="historyValueTotal">¥0.00</strong><small id="historyValueNote">已确认金额</small></div></div>
+<p id="historyScope" class="history-scope"></p><p id="historyStorageNotice" class="app-error" role="alert" hidden></p>
+<div class="history-views" role="tablist" aria-label="历史记录视图"><button type="button" role="tab" data-history-view="daily" aria-selected="true" aria-controls="historyDailyPanel">每日汇总</button><button type="button" role="tab" data-history-view="users" aria-selected="false" aria-controls="historyUsersPanel">用户与消费</button><button type="button" role="tab" data-history-view="chats" aria-selected="false" aria-controls="historyChatsPanel">弹幕查证</button></div>
+<div id="historyDailyPanel" role="tabpanel">
+<div id="historyTableWrap" class="history-table-wrap" hidden><table class="history-table"><thead><tr><th>日期 / 直播间</th><th class="numeric">弹幕</th><th class="numeric">人数</th><th class="numeric">礼物</th><th class="numeric">礼物价值</th><th><span class="sr-only">操作</span></th></tr></thead><tbody id="historyRows"></tbody></table></div>
+<div id="historyEmpty" class="history-empty"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="10" y="9" width="28" height="31" rx="5"/><path d="M17 6v7M31 6v7M10 19h28M17 26h5M17 32h12"/></svg><strong>这个时间段还没有记录</strong><p>连接直播间后自动记录每天的弹幕与礼物。<br>旧版未记录的数据无法补回，模拟测试不写入历史。</p></div>
+</div><div id="historyUsersPanel" role="tabpanel" hidden><p class="history-intro">当前筛选范围内，普通送礼与抽奖投入计消费，实际奖励单独计礼物价值。离线、缺价或旧版未保存用户的数据不猜测补全。</p><div class="history-table-wrap"><table class="history-table history-users-table"><thead><tr><th>用户 / UID</th><th class="numeric">弹幕</th><th class="numeric">礼物价值</th><th class="numeric">已知消费</th><th>查证</th></tr></thead><tbody id="historyUserRows"></tbody></table></div><p id="historyUsersEmpty" class="history-detail-caption" hidden>没有可归属到用户的记录。新版开始保存用户归属，旧版历史无法追溯。</p><div class="history-pagination"><button id="usersPrevious" class="button quiet" type="button">上一页</button><span id="usersPageLabel"></span><button id="usersNext" class="button quiet" type="button">下一页</button></div></div>
+<div id="historyChatsPanel" role="tabpanel" hidden><div class="history-chat-search"><label for="historyChatKeyword">弹幕关键词</label><input id="historyChatKeyword" type="search" placeholder="在已保存的正文中查找" autocomplete="off" /></div><p id="historyChatHint" class="history-detail-caption"></p><ol id="historyChatRows" class="history-chat-list"></ol><div class="history-pagination"><button id="chatsPrevious" class="button quiet" type="button">上一页</button><span id="chatsPageLabel" aria-live="polite"></span><button id="chatsNext" class="button quiet" type="button">下一页</button></div></div>
+<p id="historyActionStatus" class="history-action-status" role="status" aria-live="polite"></p><p id="historyStorageHint" class="history-storage"></p>
+</div></section><section class="settings-group" data-settings-group><h2 class="group-heading">如何统计</h2><div class="setting-item full-width"><p class="history-intro">弹幕窗口显示本次运行、当前直播间的统计；这里按天累计，重启后继续保留。各天发言人数不能直接相加当成跨日唯一人数。</p><details class="history-rules"><summary>查看统计口径与排除规则</summary><dl id="historyRules"></dl></details></div></section></section>
+<section class="settings-page" data-page="storage" data-title="存储与缓存" data-description="查看磁盘占用，清理前先确认范围；已保存的数据始终保留。" hidden>
+<section class="settings-group" data-settings-group><h2 class="group-heading">缓存位置</h2>
+<div class="setting-item full-width"><div class="setting-info"><strong>缓存存放位置</strong><div class="setting-desc">在选中的位置创建专用 xingmu-cache 子目录，重启后生效。配置和统计记录保持原位置；已知旧缓存仍可通过下方确认清理。</div></div>
+<div class="cache-location"><span>本次运行</span><div id="cachePath" class="storage-path"></div></div>
+<div id="cacheNextLocation" class="cache-location" hidden><span>下次启动</span><div id="cacheConfiguredPath" class="storage-path"></div></div>
+<div class="cache-actions"><button id="chooseCacheDirectory" class="button" type="button">选择位置…</button><button id="resetCacheDirectory" class="button quiet" type="button">恢复默认位置</button><button id="openCacheDirectory" class="button quiet" type="button">打开当前目录</button></div>
+<div id="cacheRestartNotice" class="cache-restart" hidden><span>位置已保存，重启后使用新目录。</span><button id="restartForCache" class="button quiet" type="button">保存并重启</button></div>
+<p id="cacheLocationStatus" class="cache-status" role="status" aria-live="polite"></p>
+<p class="cache-notice">网页图片缓存预算 128 MB；头像最多 8 MB，表情目录最多 4 MB。礼物视频只使用最多 32 MB 内存缓存，退出时释放。</p></div>
+</section>
+
+<section class="settings-group" data-settings-group><h2 class="group-heading">缓存占用</h2><div class="setting-item full-width">
+  <div id="cacheSummary" class="cache-summary"><div><span class="cache-summary-label">可清理缓存</span><strong id="cacheTotal" class="cache-total">计算中…</strong></div><div class="cache-actions"><button id="refreshCache" class="button quiet" type="button">刷新占用</button><button id="clearCache" class="button primary" type="button">清理缓存…</button></div></div>
+  <p class="cache-notice">点击“清理缓存”后会先列出删除范围，确认后才执行。表情、礼物图片和官方礼物条按需下载；礼物动画只缓存在内存，清理时一并释放。</p>
+  <div id="cacheGroups" class="cache-groups" aria-label="可清理的缓存类别"></div>
+  <p id="cacheStatus" class="cache-status" role="status" aria-live="polite"></p>
+</div></section>
+<section class="settings-group" data-settings-group><h2 class="group-heading">已保存的数据</h2><div class="setting-item full-width"><div class="cache-summary"><div><span class="cache-summary-label">每日统计与弹幕记录</span><strong id="historySize" class="cache-total">计算中…</strong></div><span class="cache-preserved">清理时保留</span></div><p class="cache-notice">配置文件、配置备份、手动礼物补价、用户与礼物记录、已保存的弹幕正文和导出的 Excel 均不会删除。界面偏好和其他非缓存文件也会保留。</p></div></section>
+<section class="settings-group" data-settings-group><h2 class="group-heading">本地配置</h2><div class="setting-item full-width" >
+              <div class="setting-info"><label id="label-storagePath" for="storagePath">配置保存位置</label><div class="setting-desc">设置固定保存在当前 Windows 账户。移动或更新 EXE 后仍然保留，并自动维护备份。</div></div>
+              <div class="setting-control"><div id="storagePath" class="storage-path"></div></div>
+            </div><div class="setting-item full-width" >
+              <div class="setting-info"><label id="label-storageHelp" for="storageHelp">升级与迁移</label><div class="setting-desc">首次升级会尝试导入旧程序目录的 data/config.json。迁移到另一台电脑时，完全退出程序后复制 config.json；需要统计历史时，一并复制 statistics 文件夹到对方的配置目录。</div></div>
+              <div class="setting-control"><span class="muted">保存失败会在顶部明确提示</span></div>
+            </div></section></section>
+<section class="settings-page" data-page="advanced" data-title="测试与关于" data-description="预览弹幕显示效果，查看当前版本。" hidden><section class="settings-group" data-settings-group><h2 class="group-heading">模拟测试</h2><div class="setting-item" >
+              <div class="setting-info"><label id="label-simulate" for="simulate">使用模拟弹幕</label><div class="setting-desc">开启后点击“启动飘屏”预览效果；测试数据与真实统计分开。</div></div>
+              <div class="setting-control"><label class="toggle-switch"><input type="checkbox" id="simulate" data-config="simulateDanmaku" aria-label="使用模拟弹幕" /><span class="slider"></span></label></div>
+            </div><div class="setting-item" >
+              <div class="setting-info"><label id="label-simMs" for="simMs">发送间隔（毫秒）</label><div class="setting-desc">每条示例消息之间的间隔。</div></div>
+              <div class="setting-control"><input id="simMs" type="number" min="200" max="60000" step="50" data-config="simulateIntervalMs" aria-labelledby="label-simMs" /></div>
+            </div></section><section class="settings-group" data-settings-group><h2 class="group-heading">关于 Starveil</h2><div class="setting-item"><div class="about-mark"><img data-brand-icon alt="Starveil 图标" /><div><strong>Starveil · 星幕</strong><span>斗鱼弹幕助手 · <span data-app-version></span></span></div></div><button id="checkUpdates" class="button" type="button">检查更新</button></div><div id="updateStatus" class="setting-item muted" hidden role="status"></div></section></section><div id="noResults" class="no-results" hidden>没有找到相关设置<br>试试“头像”“颜色”或“礼物”</div></main>
+    </div>
+    <script type="module" src="./settings.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,12 @@
+const { existsSync, statSync } = require('node:fs')
+const { join, resolve } = require('node:path')
+const { spawnSync } = require('node:child_process')
+if (process.platform !== 'win32') throw new Error('Starveil 仅支持在 Windows 上构建。')
+const root = resolve(__dirname, '..')
+const source = join(root, 'native', 'desktop-state.cs')
+const output = join(root, 'resources', 'desktop-state.exe')
+if (existsSync(output) && statSync(output).mtimeMs >= statSync(source).mtimeMs) process.exit(0)
+const compiler = join(process.env.WINDIR || 'C:\\Windows', 'Microsoft.NET', 'Framework64', 'v4.0.30319', 'csc.exe')
+const result = spawnSync(compiler, ['/nologo', '/optimize+', '/target:exe', '/platform:anycpu', '/out:' + output, source], { stdio: 'inherit', windowsHide: true })
+if (result.error) console.error(result.error.message)
+process.exitCode = result.status ?? 1

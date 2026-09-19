@@ -1,0 +1,42 @@
+# Dependencies and generated build files
+/node_modules/
+.pnpm-store/
+/out/
+/release/
+/dist/
+/resources/desktop-state.exe
+package-lock.json
+*.tsbuildinfo
+coverage/
+
+# Local configuration, saved records and runtime caches
+/data/
+/data.douyu-danmaku-overlay/
+/statistics/
+/cache/
+/xingmu-cache/
+/logs/
+/exports/
+/config.json
+/config.json.bak
+/cache-paths.json
+/NVIDIA Corporation/
+*.log
+*.tmp
+*.dmp
+
+# Local secrets and signing keys
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+*.key
+
+# Editor and operating-system files
+.cursor/
+.codex/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

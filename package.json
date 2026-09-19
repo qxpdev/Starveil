@@ -1,0 +1,110 @@
+{
+  "name": "starveil",
+  "version": "1.10.4",
+  "private": true,
+  "description": "Starveil · A transparent Douyu chat, gift and stats overlay for Windows",
+  "homepage": "https://github.com/qxpdev/Starveil#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/qxpdev/Starveil.git"
+  },
+  "bugs": {
+    "url": "https://github.com/qxpdev/Starveil/issues"
+  },
+  "main": "out/main/index.js",
+  "type": "module",
+  "os": ["win32"],
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "node scripts/clean-dist.cjs --out-only && node scripts/build-icons.cjs && node scripts/build-desktop-state.cjs && electron-vite dev",
+    "build": "node scripts/clean-dist.cjs --out-only && node scripts/build-icons.cjs && node scripts/build-desktop-state.cjs && electron-vite build",
+    "preview": "electron-vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
+    "test": "node scripts/test.cjs",
+    "postinstall": "electron-builder install-app-deps",
+    "clean:dist": "node scripts/clean-dist.cjs",
+    "release:notes": "node scripts/release-notes.cjs",
+    "dist": "pnpm build && node scripts/package-windows.cjs",
+    "dist:dir": "pnpm build && electron-builder --win --x64 --dir --publish never"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/ws": "^8.5.13",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
+    "electron-vite": "^2.3.0",
+    "typescript": "~5.7.2",
+    "vite": "^5.4.11"
+  },
+  "build": {
+    "appId": "com.douyu.danmaku.overlay",
+    "productName": "Starveil",
+    "artifactName": "${productName}-${version}-win-${arch}.${ext}",
+    "directories": {
+      "output": "release/.build",
+      "buildResources": "resources"
+    },
+    "files": [
+      "out/**",
+      "package.json",
+      "LICENSE",
+      "THIRD_PARTY_NOTICES.md",
+      "!node_modules/**/archiver-utils{,/**/*}",
+      {
+        "from": "node_modules/archiver-utils",
+        "to": "node_modules/archiver-utils",
+        "filter": ["**/*"]
+      },
+      {
+        "from": "node_modules/archiver-utils/node_modules/readable-stream",
+        "to": "node_modules/archiver-utils/node_modules/readable-stream",
+        "filter": ["**/*"]
+      },
+      {
+        "from": "node_modules/zip-stream/node_modules/archiver-utils",
+        "to": "node_modules/zip-stream/node_modules/archiver-utils",
+        "filter": ["**/*"]
+      },
+      {
+        "from": "node_modules/archiver/node_modules/archiver-utils",
+        "to": "node_modules/archiver/node_modules/archiver-utils",
+        "filter": ["**/*"]
+      },
+      {
+        "from": "node_modules/archiver/node_modules/archiver-utils/node_modules/readable-stream",
+        "to": "node_modules/archiver/node_modules/archiver-utils/node_modules/readable-stream",
+        "filter": ["**/*"]
+      }
+    ],
+    "afterPack": "scripts/verify-packaged-dependencies.cjs",
+    "extraResources": [
+      {
+        "from": "resources/desktop-state.exe",
+        "to": "desktop-state.exe"
+      },
+      {
+        "from": "resources/icon.png",
+        "to": "icon.png"
+      }
+    ],
+    "portable": {
+      "unpackDirName": true
+    },
+    "win": {
+      "executableName": "Starveil",
+      "icon": "resources/icon.ico",
+      "target": [
+        "portable"
+      ]
+    }
+  },
+  "author": "Starveil contributors",
+  "license": "MIT"
+}

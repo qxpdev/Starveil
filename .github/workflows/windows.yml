@@ -1,0 +1,54 @@
+name: Windows CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 25
+    env:
+      ELECTRON_MIRROR: https://github.com/electron/electron/releases/download/
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6.1.0
+        with:
+          cache: false
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: '22'
+          cache: pnpm
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Type check
+        run: pnpm typecheck
+      - name: Test behavior and data protection
+        run: pnpm test
+      - name: Build Windows portable app and verify packaged files
+        run: pnpm dist
+      - name: Prepare release notes
+        run: pnpm release:notes
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: Starveil-windows-x64
+          path: |
+            release/Starveil-*-win-x64.exe
+            release/Starveil-*-win-x64.exe.sha256
+            release/Starveil-*-NOTICES.txt
+            release/Starveil-*-release-notes.md
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0

@@ -1,0 +1,849 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://apic.douyucdn.cn https://*.douyucdn.cn; connect-src 'self' xingmu-gift:; media-src blob:"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Starveil · 星幕 · 弹幕</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", sans-serif;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: transparent;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      .chat-emoticon {
+        display: inline-block;
+        width: 1.65em;
+        height: 1.65em;
+        vertical-align: middle;
+        object-fit: contain;
+        margin: 0 0.06em;
+      }
+
+      #dragRegion {
+        position: fixed;
+        inset: 3px;
+        z-index: 0;
+        -webkit-app-region: drag;
+      }
+
+      .overlay-shell {
+        --font-size: 20px;
+        --avatar-size: 32px;
+        --fans-medal-scale: 1;
+        --user-level-scale: 1;
+        --nickname-scale: 1;
+        --letter-spacing: 0px;
+        --text-line-height: 1.5;
+        --edge-inset: 0px;
+        --row-gap: 1px;
+        --panel-background: rgba(0, 0, 0, 0.5);
+        --window-background: transparent;
+        --common-text: #ffffff;
+        --secondary-text: #bcbcbc;
+        --username-text: #56e3f9;
+        --gift-text: #f7b500;
+        --text-shadow: none;
+        --status-space: 0px;
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        padding: var(--edge-inset);
+        overflow: hidden;
+        background: transparent;
+        transition: background-color 180ms ease;
+        color: var(--common-text);
+        font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", sans-serif;
+        font-size: var(--font-size);
+        font-weight: 400;
+        line-height: var(--text-line-height);
+        pointer-events: none;
+        contain: strict;
+      }
+
+      /* 只在有可见弹幕或礼物时显示底色，与鼠标穿透互相独立。 */
+      .overlay-shell.has-content {
+        background: var(--window-background);
+      }
+
+      .overlay-shell:not(.is-ready) { visibility: hidden; transition: none; }
+
+      .message-pane {
+        position: relative;
+        flex: 1 1 auto;
+        min-width: 0;
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      .is-unlocked .message-pane {
+        background: transparent;
+      }
+
+      .message-list,
+      .highlight-list {
+        list-style: none;
+      }
+
+      .message-list {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        min-width: 0;
+        margin: 0;
+        padding: 8px;
+        overflow: hidden;
+      }
+
+      .message-list:not(:empty) {
+        background: var(--panel-background);
+      }
+
+      .message-row {
+        display: flex;
+        flex: 0 0 auto;
+        width: 100%;
+        min-width: 0;
+        margin: var(--row-gap) 0 0;
+        color: var(--common-text);
+        align-items: center;
+        line-height: var(--text-line-height);
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        animation: message-enter var(--message-enter-duration, 180ms) cubic-bezier(.22,1,.36,1);
+      }
+
+      .message-row:first-child {
+        margin-top: 0;
+      }
+
+      /* 整个列表使用同一条位移轨迹，进退场只改透明度，避免行与行互相追赶。 */
+      .message-list > .message-row,
+      .highlight-list > .highlight-row {
+        transform: translate3d(0, var(--flow-offset, 0px), 0);
+      }
+
+      .message-row.is-static,
+      .highlight-row.is-static {
+        animation: none;
+      }
+
+      .message-row > .avatar {
+        width: var(--avatar-size);
+        height: var(--avatar-size);
+        flex: 0 0 var(--avatar-size);
+        margin: 0 0.4em 0 0;
+      }
+
+      .avatar {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border: 0;
+        border-radius: 50%;
+        background: #6f7377;
+        color: #fff;
+        font-size: 0.72em;
+        font-weight: 500;
+        line-height: 1;
+      }
+
+      .avatar img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .avatar__fallback {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .avatar img:not([hidden]) + .avatar__fallback {
+        display: none;
+      }
+
+      .info-box {
+        display: block;
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+
+      .info-box > .item {
+        margin: 0 0.3em 0 0;
+        vertical-align: middle;
+        text-shadow: var(--text-shadow);
+      }
+
+      .info-box > .item:last-child {
+        margin-right: 0;
+      }
+
+      .moderator,
+      .vip-icon {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+      }
+
+      .noble-icon {
+        display: inline-block;
+        width: 1.5em;
+        height: 1.5em;
+        object-fit: contain;
+      }
+
+      .noble-fallback {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.25em;
+        height: 1.25em;
+        border-radius: 50%;
+        background: #c78c2e;
+        color: #fff;
+        font-size: 0.625em;
+        font-weight: 700;
+      }
+
+      .fans-medal {
+        display: inline-flex;
+        font-size: calc(1em * var(--fans-medal-scale));
+        align-items: center;
+        gap: 0.18em;
+        max-width: 100%;
+        height: auto;
+        letter-spacing: 0;
+        vertical-align: middle;
+      }
+
+      .fans-medal__badge {
+        display: inline-flex;
+        flex: 0 0 auto;
+        align-items: center;
+        min-width: 0;
+        min-height: 1.35em;
+        padding: 0.08em 0.35em 0.08em 0.2em;
+        border: 0;
+        border-radius: 999px;
+        overflow: hidden;
+        background-color: transparent;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+      }
+
+      .fans-medal,
+      .fans-medal * {
+        text-shadow: none !important;
+        box-shadow: none;
+      }
+
+      .fans-medal__name {
+        flex: 1 1 auto;
+        min-width: 0;
+        color: #fff;
+        font-size: 0.75em;
+        line-height: 1.4;
+        text-align: center;
+        white-space: nowrap;
+      }
+
+      .fans-medal__level {
+        flex: 0 0 auto;
+        min-width: 1.6em;
+        margin-right: 0.15em;
+        color: #fff;
+        font-size: 0.7em;
+        font-weight: 700;
+        line-height: 1.4;
+        text-align: center;
+      }
+
+      .fans-medal__diamond {
+        display: block;
+        position: static;
+        flex: 0 0 1.45em;
+        width: 1.45em;
+        height: 1.2em;
+        object-fit: contain;
+      }
+
+      .username,
+      .content,
+      .gift-name {
+        letter-spacing: var(--letter-spacing);
+      }
+
+      .user-level {
+        display: inline-block;
+        font-size: calc(1em * var(--user-level-scale));
+        width: 2.125em;
+        height: 1em;
+        background-position: left center;
+        background-repeat: no-repeat;
+        background-size: auto 100%;
+        vertical-align: middle;
+      }
+
+      .username {
+        color: var(--username-text);
+        font-size: calc(1em * var(--nickname-scale));
+      }
+
+      .username.is-super {
+        color: #fe5656;
+      }
+
+      .content {
+        color: var(--common-text);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .message-row .gift-action {
+        color: var(--secondary-text);
+      }
+
+      .gift-image {
+        display: inline-block;
+        width: 1.25em;
+        height: 1.25em;
+        border-radius: 50%;
+        object-fit: contain;
+      }
+
+      .gift-image--fallback {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #252c3a;
+        color: #f7b500;
+        font-size: 0.7em;
+        font-weight: 700;
+      }
+
+      .gift-name {
+        color: var(--gift-text);
+        overflow-wrap: anywhere;
+      }
+
+      .message-row .gift-count {
+        color: #fff;
+      }
+
+      .highlight-row .gift-count {
+        color: #fff;
+      }
+
+      .highlight-row .gift-action {
+        color: var(--common-text);
+      }
+
+      .repeat-count {
+        color: #f8d376;
+        font-size: 0.82em;
+      }
+      .high-energy-label { color: #ffda92; font-size: .7em; font-weight: 700; letter-spacing: 0; }
+
+      .highlight-pane {
+        flex: 0 1 auto;
+        max-height: 46%;
+        overflow: hidden;
+        background: transparent;
+      }
+
+      .highlight-pane[hidden] {
+        display: none;
+      }
+
+      .highlight-list {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        min-width: 0;
+        margin: 0;
+        padding: clamp(4px, 0.25em, 8px) clamp(8px, 0.5em, 16px);
+      }
+
+      .highlight-row {
+        --gift-accent: #aab8c6;
+        position: relative;
+        display: flex;
+        flex: 0 0 auto;
+        flex-direction: column;
+        justify-content: flex-start;
+        min-width: 0;
+        margin: 3px 0;
+        padding: 7px 10px;
+        overflow: hidden;
+        border: 0;
+        border-radius: 8px;
+        background: var(--gift-background, transparent);
+        filter: opacity(var(--gift-opacity, 1));
+        font-size: clamp(12px, calc(var(--font-size) * .85), 22px);
+        line-height: 1.35;
+        text-shadow: var(--text-shadow);
+        animation: message-enter var(--message-enter-duration, 200ms) cubic-bezier(.22,1,.36,1);
+      }
+
+      .highlight-row::before { content: ''; position: absolute; left: 0; top: 7px; bottom: 7px; width: 2px; border-radius: 0 2px 2px 0; background: var(--gift-accent); }
+      .highlight-row[data-value-tier="free"] { --gift-accent: #adb9c1; }
+      .highlight-row[data-value-tier="small"] { --gift-accent: #92e0c7; }
+      .highlight-row[data-value-tier="medium"] { --gift-accent: #9bcff8; }
+      .highlight-row[data-value-tier="large"] { --gift-accent: #d0b6fa; }
+      .highlight-row[data-value-tier="premium"] { --gift-accent: #f7d18b; }
+      .highlight-row[data-value-tier="neutral"] { --gift-accent: #b9c3cb; }
+      .highlight-row[data-value-tier="neutral"]::before { display: none; }
+
+      .highlight-row__top {
+        position: relative;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        min-width: 0;
+        overflow: hidden;
+      }
+
+      .highlight-row__avatar {
+        font-size: inherit;
+        width: min(var(--avatar-size), 1.7em);
+        height: min(var(--avatar-size), 1.7em);
+        flex: 0 0 min(var(--avatar-size), 1.7em);
+        margin-right: 0.5em;
+      }
+
+      .highlight-row__right {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        justify-content: center;
+        gap: 1px;
+        min-width: 0;
+        overflow: hidden;
+      }
+
+      .highlight-row__user,
+      .highlight-row__gift {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        min-width: 0;
+        min-height: 1.35em;
+        gap: .35em;
+        line-height: 1.35;
+        white-space: normal;
+      }
+
+      .highlight-row__user > *,
+      .highlight-row__gift > * {
+        flex: 0 1 auto;
+        min-width: 0;
+        margin: 0;
+      }
+
+      .highlight-row__price {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: .3em;
+        flex: 0 1 auto;
+        max-width: 65%;
+        margin-left: auto;
+        color: var(--gift-accent);
+        font-size: 1em;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
+
+      .highlight-row__user .username {
+        flex: 1 1 auto;
+        overflow: hidden;
+        font-size: clamp(.8em, calc(1em * var(--nickname-scale)), 1.15em);
+        font-weight: 500;
+        line-height: 1.35;
+        letter-spacing: 0;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .highlight-row__gift { font-size: .82em; }
+      .highlight-row__gift .gift-image { flex: 0 0 1.25em; width: 1.25em; height: 1.25em; border-radius: 3px; }
+      .highlight-row__gift .gift-name,
+      .highlight-row__gift .gift-action { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; letter-spacing: 0; }
+      .highlight-row__gift .gift-count { flex: 0 0 auto; color: #dce2e8; font-variant-numeric: tabular-nums; white-space: nowrap; }
+      .gift-art { position: relative; flex: 0 0 2.8em; width: 2.8em; height: 2.8em; max-width: 62px; max-height: 62px; margin-left: .5em; }
+      .gift-art > .gift-image { width: 100%; height: 100%; object-fit: contain; background: transparent; border-radius: 0; }
+      .gift-art > .gift-image--fallback { display: flex; align-items: center; justify-content: center; }
+      .gift-effect-host { position: absolute; inset: 0; pointer-events: none; }
+      .gift-effect-canvas { width: 100%; height: 100%; object-fit: contain; }
+      .gift-art.is-playing > .gift-image { visibility: hidden; }
+      .gift-banner-slot { position: absolute; inset: 0; pointer-events: none; }
+      .official-gift-banner { position: absolute; inset: 2px 0; width: 100%; height: calc(100% - 4px); object-fit: fill; opacity: var(--gift-banner-opacity, .55); pointer-events: none; }
+      .has-official-banner::before { display: none; }
+      .gift-value-label { flex: 0 0 auto; color: #b9c4d0; font-size: .76em; font-weight: 400; }
+      .gift-amount { display: inline-block; min-width: 0; max-width: 100%; font-weight: 800; white-space: nowrap; letter-spacing: 0; }
+      .highlight-row__price .gift-amount {
+        font-size: calc(1em * var(--gift-amount-scale, 1.25));
+        color: var(--gift-accent);
+        -webkit-text-stroke: .6px rgba(0, 0, 0, .8);
+        paint-order: stroke fill;
+        text-shadow: 0 1px 2px #000, 0 0 5px rgba(0, 0, 0, .85);
+      }
+      .highlight-row__price.is-pending { color: #bac6d2; font-size: .76em; font-weight: 400; }
+      .gift-cost {
+        display: flex;
+        align-items: center;
+        flex: 0 1 auto;
+        gap: .3em;
+        max-width: 60%;
+        margin-left: auto;
+        color: #d6dee5;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
+      .gift-cost .gift-value-label { font-size: .9em; }
+      .gift-cost .gift-amount { font-weight: 500; }
+      .lottery-rewards { display: flex; flex-wrap: wrap; gap: .1em .6em; margin-top: 4px; color: #c5cbd5; font-size: .75em; line-height: 1.35; }
+      .lottery-reward-item { max-width: 100%; overflow-wrap: anywhere; }
+      .gift-pending-note { margin-top: 4px; color: #b9c3ce; font-size: .72em; line-height: 1.35; }
+
+      .is-inline-gift { font-size: var(--font-size); line-height: var(--text-line-height); }
+      .is-inline-gift .highlight-row__avatar { width: var(--avatar-size); height: var(--avatar-size); flex-basis: var(--avatar-size); }
+      .is-inline-gift .highlight-row__right { display: grid; grid-template-columns: fit-content(24%) minmax(3em, 1fr) max-content; align-items: center; gap: .35em; }
+      .is-inline-gift .highlight-row__user { display: contents; }
+      .is-inline-gift .highlight-row__user .username { grid-row: 1; grid-column: 1; font-size: calc(1em * var(--nickname-scale)); }
+      .is-inline-gift .highlight-row__gift { grid-row: 1; grid-column: 2; font-size: .9em; gap: .15em; }
+      .is-inline-gift .highlight-row__price { grid-row: 1; grid-column: 3; max-width: none; font-size: 1em; margin: 0; }
+      .is-inline-gift .gift-art { width: 1.6em; height: 1.6em; flex-basis: 1.6em; margin-left: .25em; }
+
+      .status-bar {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: flex-start;
+        justify-content: space-between;
+        min-width: 0;
+        height: max(32px, calc(var(--status-font-size, 14px) * 1.5 + 10px));
+        margin-top: 0;
+        padding: 0 12px;
+        overflow: hidden;
+        background: var(--status-background, var(--panel-background));
+        filter: opacity(var(--status-opacity, 1));
+        color: #fff;
+        font-size: var(--status-font-size, 14px);
+        line-height: max(32px, calc(var(--status-font-size, 14px) * 1.5 + 10px));
+        white-space: nowrap;
+      }
+
+      .status-bar[hidden] {
+        display: none;
+      }
+
+      .status-bar {
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 180ms ease, visibility 0s;
+      }
+
+      .status-bar.is-idle-hidden {
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 180ms ease, visibility 0s linear 180ms;
+      }
+
+      .status-bar__item {
+        display: flex;
+        align-items: center;
+        min-width: 0;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .status-bar__items {
+        display: flex;
+        flex: 3 1 auto;
+        align-items: center;
+        justify-content: space-between;
+        min-width: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .status-bar__item.is-rotating {
+        justify-content: flex-end;
+        margin-right: 4px;
+      }
+
+      .status-bar.is-single-stat .status-bar__item:not([hidden]) {
+        flex: 1 1 auto;
+        justify-content: flex-start;
+      }
+
+      .status-bar__change {
+        display: inline-flex;
+        align-items: center;
+        margin-left: 4px;
+        color: #9e9e9e;
+        font-size: 12px;
+      }
+
+      .status-bar__change.is-positive {
+        color: #ed1c24;
+      }
+
+      .status-bar__change[hidden] {
+        display: none;
+      }
+
+      .status-bar__value {
+        color: #fff;
+      }
+
+      .status-bar__lock {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 20px;
+        width: 20px;
+        height: 32px;
+        margin: 0 0 0 4px;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.42);
+        cursor: pointer;
+        pointer-events: auto;
+      }
+
+      .status-bar__lock:hover {
+        color: rgba(255, 255, 255, 0.82);
+      }
+
+      .status-bar__lock svg {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.8;
+      }
+
+      .moving-layer {
+        position: absolute;
+        inset: var(--edge-inset);
+        overflow: hidden;
+      }
+
+      .moving-layer .message-row {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: max-content;
+        max-width: 100%;
+        margin: 0;
+        padding: 0 0.5em 0 0.25em;
+        border-radius: 2px;
+        background: var(--panel-background);
+        animation: none;
+        will-change: transform;
+        contain: layout style paint;
+      }
+
+      @media (max-width: 330px) {
+        .status-bar__item {
+          max-width: none;
+        }
+
+        .status-bar__item.is-primary {
+          display: none;
+        }
+
+        .status-bar__item.is-rotating {
+          flex: 1 1 auto;
+          justify-content: flex-start;
+        }
+      }
+
+      .overlay-shell.is-stream-mode .moving-layer {
+        display: none;
+      }
+
+      .edge-scene { display: none; }
+
+      /* 消息与礼物共用一列；常驻统计只绘制自身的小条衬底。 */
+      .overlay-shell.is-edge-mode { background: transparent; transition: none; }
+      .is-edge-mode .message-pane,
+      .is-edge-mode .highlight-pane,
+      .is-edge-mode .moving-layer { display: none !important; }
+      .is-edge-mode .edge-scene {
+        display: block;
+        position: absolute;
+        inset: 24px 16px;
+        bottom: clamp(24px, calc(24px + var(--edge-bottom-percent, 0%)), calc(100% - 120px));
+      }
+      .edge-layer {
+        position: absolute;
+        inset: 0;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        overflow: visible;
+      }
+      .is-edge-mode .status-bar { position: absolute; top: 0; right: 0; left: 0; z-index: 2; margin: 0; border-radius: 8px; padding: 0 10px; }
+      .is-edge-mode[data-edge-status-position="bottom"] .status-bar { top: auto; bottom: 0; }
+      .edge-layer > .edge-item {
+        position: absolute;
+        left: 0;
+        width: 100%;
+        margin: 0;
+        transform: translate3d(0, 0, 0);
+        animation: none;
+        contain: layout style;
+      }
+      .edge-layer > .message-row {
+        padding: 7px 10px;
+        overflow: hidden;
+        border-radius: 8px;
+        background: linear-gradient(to right, color-mix(in srgb, var(--panel-background) 86%, transparent), var(--panel-background));
+      }
+      [data-edge-side="left"] .edge-layer > .message-row {
+        background: linear-gradient(to left, color-mix(in srgb, var(--panel-background) 86%, transparent), var(--panel-background));
+      }
+
+      .overlay-shell.is-moving-mode .message-pane {
+        display: none !important;
+      }
+
+      .overlay-shell.is-moving-mode .status-bar {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 3;
+      }
+
+      /* 移动飘屏模式下，礼物仍只显示在高亮卡片中；固定在窗口底部，
+         不与横向/竖向弹幕的碰撞层混在一起。 */
+      .overlay-shell.is-moving-mode .highlight-pane {
+        position: absolute;
+        right: 0;
+        bottom: var(--status-space);
+        left: 0;
+        z-index: 2;
+        max-height: 46%;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      @keyframes message-enter {
+        from {
+          opacity: 0.2;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .overlay-shell.reduce-motion,
+      .overlay-shell.reduce-motion * {
+        animation: none !important;
+        transition: none !important;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .overlay-shell,
+        .status-bar,
+        .status-bar.is-idle-hidden {
+          transition: none;
+        }
+
+        .message-row,
+        .highlight-row {
+          animation: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="dragRegion" aria-hidden="true"></div>
+    <main id="overlayRoot" class="overlay-shell is-stream-mode is-locked" aria-hidden="true">
+      <section id="messagePane" class="message-pane">
+        <ol id="messageList" class="message-list"></ol>
+      </section>
+
+      <section id="highlightPane" class="highlight-pane" hidden>
+        <ol id="highlightList" class="highlight-list"></ol>
+      </section>
+
+      <footer id="statusBar" class="status-bar" hidden>
+        <div class="status-bar__items">
+          <span id="statusPrimary" class="status-bar__item is-primary" hidden>
+            <span id="statusPrimaryLabel"></span>：<span id="statusPrimaryValue" class="status-bar__value">0</span>
+            <span id="statusPrimaryChange" class="status-bar__change" hidden></span>
+          </span>
+          <span id="statusRotating" class="status-bar__item is-rotating" hidden>
+            <span id="statusRotatingLabel"></span>：<span id="statusRotatingValue" class="status-bar__value">0</span>
+            <span id="statusRotatingChange" class="status-bar__change" hidden></span>
+          </span>
+        </div>
+        <button id="unlockIndicator" class="status-bar__lock" type="button" aria-label="锁定窗口并开启鼠标穿透" title="锁定窗口并开启鼠标穿透">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="5" y="10" width="14" height="10" rx="2"></rect>
+            <path d="M16 10V7a4 4 0 0 0-7.5-2"></path>
+          </svg>
+        </button>
+      </footer>
+
+      <div id="movingLayer" class="moving-layer"></div>
+      <div id="edgeScene" class="edge-scene">
+        <ol id="edgeLayer" class="edge-layer"></ol>
+      </div>
+    </main>
+    <script type="module" src="./overlay.ts"></script>
+  </body>
+</html>
